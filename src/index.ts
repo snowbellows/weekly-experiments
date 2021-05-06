@@ -18,9 +18,6 @@ const sketch = (p: p5) => {
   const DAMPING = 0.1;
   const SIZE = 5;
   const STEP = 2;
-  // const BLUE = p.color(200, 74, 63);
-  // const PINK = p.color(340, 35, 96);
-  // const APRICOT = p.color(22, 27, 100);
   const BLUE = p.color(41, 120, 160);
   const PINK = p.color(244, 159, 188);
   const APRICOT = p.color(255, 211, 186);
