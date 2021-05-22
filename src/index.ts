@@ -1,63 +1,32 @@
 import _ from 'lodash';
 import p5 from 'p5';
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-}
+const FPS = 30;
+const DURATION = 30000;
+
+const AMPLITUDE = 0.7;
+const FREQUENCY = 30.0;
+const SPHERE_SIZE = 300;
+
+// let startMillis: number;
+// let canvas: HTMLElement | null;
 
 const sketch = (p: p5) => {
-  const FPS = 30;
-  // const DURATION = 10000;
-
-  const NUM_PARTICLES = 400;
-  const FREQUENCY = 0.0011;
-  const AMPLITUDE = 20;
-  const DAMPING = 0.1;
-  const SIZE = 5;
-  const STEP = 2;
-  const BLUE = p.color(41, 120, 160);
-  const PINK = p.color(244, 159, 188);
-  const APRICOT = p.color(255, 211, 186);
-
-  let points: Particle[] = [];
-  // let startMillis: number;
-  // let canvas: HTMLElement | null;
+  let shader: p5.Shader;
 
   //@ts-ignore
-  // const capturer = new CCapture({ format: 'png', framerate: FPS });
+  // let capturer = new CCapture({ format: 'png', framerate: FPS });
 
-  function moveParticle(particle: Particle) {
-    const angle =
-      p.noise(particle.x * FREQUENCY, particle.y * FREQUENCY) * AMPLITUDE;
-
-    const newVx = particle.vx + p.cos(angle) * STEP;
-    const newVy = particle.vy + p.sin(angle) * STEP;
-
-    return {
-      x: particle.x + newVx,
-      y: particle.y + newVy,
-      vx: newVx * DAMPING,
-      vy: newVy * DAMPING,
-    };
-  }
+  p.preload = () => {
+    shader = p.loadShader('texture.vert', 'texture.frag');
+  };
 
   p.setup = () => {
+    p.createCanvas(800, 800, p.WEBGL);
+    p.noStroke();
     p.frameRate(FPS);
-    p.createCanvas(800, 800);
-    p.background(BLUE);
 
-    points = _.range(1, NUM_PARTICLES).map(() => {
-      return {
-        x: _.random(0, window.innerWidth),
-        y: _.random(0, window.innerHeight),
-        vx: 0,
-        vy: 0,
-      };
-    });
-    // canvas = document.getElementById('defaultCanvas0')
+    // canvas = document.getElementById('defaultCanvas0');
   };
 
   p.draw = () => {
@@ -77,15 +46,21 @@ const sketch = (p: p5) => {
     //   return;
     // }
 
-    points = points.map(moveParticle);
+    p.background(255);
 
-    points.forEach((point, index) => {
-      const amount = p.map(index, 1, NUM_PARTICLES, 0, 1);
-      const color = p.lerpColor(PINK, APRICOT, amount);
-      p.stroke(color);
-      p.fill(color);
-      p.circle(point.x, point.y, SIZE);
-    });
+    p.push();
+    p.shader(shader);
+
+    shader.setUniform('uFrameCount', p.frameCount);
+    shader.setUniform('uAmplitude', AMPLITUDE);
+    shader.setUniform('uFrequency', FREQUENCY);
+
+    p.rotateZ(p.frameCount * 0.005);
+    p.rotateX(p.frameCount * 0.005);
+    p.rotateY(p.frameCount * 0.005);
+
+    p.sphere(SPHERE_SIZE);
+    p.pop();
   };
 };
 
